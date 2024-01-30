@@ -1,8 +1,6 @@
 
 provider "aws" {
   region = "us-east-1"
-
-
 }
 
 variable "subnet_cidr_block" {
@@ -24,6 +22,13 @@ variable "avail_zone" {
 
 variable "env_prefix" {
   type = string
+
+}
+
+variable "private_key_path" {
+  type = string
+  description = "value of private key path"
+  default = "/Users/ilemo/.ssh/id_rsa"
 
 }
 
@@ -103,6 +108,12 @@ resource "aws_security_group" "myapp-sg" {
         protocol = "tcp"
         cidr_blocks = ["0.0.0.0/0"]
     }
+    ingress {
+        from_port = 8080
+        to_port = 8080
+        protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
 
     egress {
         from_port = 0
@@ -151,9 +162,31 @@ resource "aws_instance" "myapp-server" {
     associate_public_ip_address = true
     key_name = aws_key_pair.ssh-key.key_name
 
-    user_data = file("entry-script.sh")
+    // user_data = file("entry-script.sh")
     tags = {
         Name: "${var.env_prefix}-server"
+    }
+    // defines the connection to the EC2 instance and we have only two ways to connect to the instance which are ssh and winrm. SSH is the daemon program for ssh connections to the EC2 instance and winrm is the daemon program for Windows Remote Management connections to the EC2 instance.
+    connection {
+      type = "ssh"
+      host = self.public_ip
+      user = "ec2-user"
+      private_key = file(var.private_key_path)
+    }
+    //  copy files from our local machine to the EC2 instance
+    provisioner "file" {
+      source = "entry-script.sh"
+      destination = "/home/ec2-user/entry-script.sh"
+      
+    }
+
+    provisioner "local-exec" {
+        command = "echo ${self.public_ip} > public_ip.txt"
+      }
+
+    provisioner "remote-exec" {
+      script = file("entry-script.sh")
+      
     }
 }
 
@@ -161,3 +194,4 @@ output "aws_public_IP" {
     value = aws_instance.myapp-server.public_ip
   
 }
+
