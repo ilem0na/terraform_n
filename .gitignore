@@ -7,3 +7,9 @@
 
 #tf variables files may contain sensitive data
 *.tfvars
+
+#ignore mac/OSX system files, with the folder name .DS_Store
+.DS_Store
+
+#ignore crash log files
+*.crash.log
