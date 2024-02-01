@@ -34,3 +34,11 @@ variable "env_prefix" {
   description = "value of environment prefix"
   default = "dev" 
 }
+
+
+variable "cluster_name" {
+  type = string
+  description = "value of cluster name"
+  default = "myapp-eks-cluster"
+  
+}

@@ -1,8 +1,9 @@
+# Purpose: Create EKS cluster
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "19.21.0"
 
-  cluster_name = "myapp-eks-cluster"  
+  cluster_name = var.cluster_name 
   cluster_version = "1.27"
 
   subnet_ids = module.myapp-vpc.private_subnets
